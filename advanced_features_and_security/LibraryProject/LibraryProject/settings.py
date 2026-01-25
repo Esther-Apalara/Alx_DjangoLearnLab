@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "LibraryProject.middleware.ContentSecurityPolicyMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -111,3 +112,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ✅ Custom User Model
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
+
+# -------------------------
+# Security Best Practices
+# -------------------------
+
+# In production, set DEBUG = False (keep True for local development)
+# DEBUG = False
+
+# Browser security protections
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Prevent clickjacking
+X_FRAME_OPTIONS = "DENY"
+
+# Cookies only sent over HTTPS (set True in production with HTTPS)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True

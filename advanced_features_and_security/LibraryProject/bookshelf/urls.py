@@ -6,4 +6,6 @@ urlpatterns = [
     path("create/", views.book_create, name="book_create"),
     path("edit/<int:pk>/", views.book_edit, name="book_edit"),
     path("delete/<int:pk>/", views.book_delete, name="book_delete"),
+    path("csrf-example/", views.csrf_example, name="csrf_example"),
+    path("safe-search/", views.safe_search, name="safe_search"),
 ]
