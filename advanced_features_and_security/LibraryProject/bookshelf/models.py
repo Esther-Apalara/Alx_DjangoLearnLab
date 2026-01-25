@@ -36,3 +36,19 @@ class CustomUser(AbstractUser):
 
     def _str_(self):
         return self.username
+
+
+class Book(models.Model):
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+
+    class Meta:
+        permissions = [
+            ("can_view", "Can view books"),
+            ("can_create", "Can create books"),
+            ("can_edit", "Can edit books"),
+            ("can_delete", "Can delete books"),
+        ]
+
+    def _str_(self):
+        return f"{self.title} by {self.author}"
