@@ -5,6 +5,7 @@ from django.db.models import Q
 
 from .models import Book
 from .forms import BookSearchForm
+from .forms import ExampleForm
 
 
 @permission_required("bookshelf.can_view", raise_exception=True)
@@ -51,3 +52,7 @@ def safe_search(request):
     # Return simple text response (no template required)
     results = ", ".join([b.title for b in books]) if books.exists() else "No results"
     return HttpResponse(f"Search results: {results}")
+
+def ExampleForm(request):
+    form = ExampleForm()
+    return render(request, "bookshelf/form_example.html", {"form": form})
