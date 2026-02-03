@@ -5,6 +5,8 @@ from .views import (
     BookCreateView,
     BookUpdateView,
     BookDeleteView
+    books/update,
+    books/delete,
 )
 
 urlpatterns = [
