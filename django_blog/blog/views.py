@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
+from django.shortcuts import redirect
 
 # -------------------
 # List all posts
@@ -60,3 +61,14 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+
+@login_required
+def profile(request):
+    if request.method == "POST":
+        user = request.user
+        user.email = request.POST.get("email")
+        user.save()
+        return redirect("profile")
+
+    return render(request, "blog/profile.html")        
