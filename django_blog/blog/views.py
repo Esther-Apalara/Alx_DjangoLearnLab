@@ -9,9 +9,9 @@ from .forms import CommentForm
 # -------------------
 class PostListView(ListView):
     model = Post
-    template_name = 'blog/post_list.html'  # blog/templates/blog/post_list.html
+    template_name = 'blog/post_list.html'
     context_object_name = 'posts'
-    ordering = ['-created_at']  # newest first
+    ordering = ['-created_at']
 
 # -------------------
 # View single post
@@ -44,7 +44,6 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
-    # Only author can update
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
@@ -55,9 +54,8 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     template_name = 'blog/post_confirm_delete.html'
-    success_url = '/posts/'
+    success_url = '/post/'
 
-    # Only author can delete
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
@@ -65,6 +63,8 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 # -------------------
 # Profile view
 # -------------------
+from django.contrib.auth.decorators import login_required
+
 @login_required
 def profile(request):
     if request.method == "POST":
