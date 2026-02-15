@@ -1,0 +1,8 @@
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Post
+    fields = ['title', 'content']
+    template_name = 'blog/post_update.html'
+
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
