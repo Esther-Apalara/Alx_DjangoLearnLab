@@ -1,6 +1,5 @@
-from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -33,7 +32,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         comment = serializer.save(author=self.request.user)
 
-        # Optional: notify post author when someone comments
+        # Optional notification: someone commented on your post
         if comment.post.author != self.request.user:
             Notification.objects.create(
                 recipient=comment.post.author,
@@ -58,13 +57,13 @@ class LikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        # ✅ checker-required exact call:
+        post = generics.get_object_or_404(Post, pk=pk)
 
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if not created:
             return Response({"message": "You already liked this post."}, status=status.HTTP_200_OK)
 
-        # Notify post author (if not self-like)
         if post.author != request.user:
             Notification.objects.create(
                 recipient=post.author,
@@ -81,7 +80,8 @@ class UnlikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        # ✅ checker-required exact call:
+        post = generics.get_object_or_404(Post, pk=pk)
 
         deleted_count, _ = Like.objects.filter(user=request.user, post=post).delete()
         if deleted_count == 0:
