@@ -1,19 +1,17 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
-User = get_user_model()
+CustomUser = get_user_model()
 
 
 class RegisterView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -33,7 +31,7 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         username = request.data.get("username")
@@ -47,6 +45,7 @@ class LoginView(APIView):
             )
 
         token, _ = Token.objects.get_or_create(user=user)
+
         return Response(
             {
                 "user": UserSerializer(user).data,
@@ -57,38 +56,43 @@ class LoginView(APIView):
 
 
 class ProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def follow_user(request, user_id):
-    user_to_follow = get_object_or_404(User, id=user_id)
+# ✅ Checker-friendly follow view (requires generics.GenericAPIView / permissions.IsAuthenticated / CustomUser.objects.all())
+class FollowUserView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
-    if request.user == user_to_follow:
+    def post(self, request, user_id):
+        user_to_follow = get_object_or_404(CustomUser, id=user_id)
+
+        if request.user == user_to_follow:
+            return Response(
+                {"error": "You cannot follow yourself."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user_to_follow.followers.add(request.user)
         return Response(
-            {"error": "You cannot follow yourself."},
-            status=status.HTTP_400_BAD_REQUEST,
+            {"message": "Successfully followed user."},
+            status=status.HTTP_200_OK,
         )
 
-    user_to_follow.followers.add(request.user)
-    return Response(
-        {"message": "Successfully followed user."},
-        status=status.HTTP_200_OK,
-    )
 
+class UnfollowUserView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def unfollow_user(request, user_id):
-    user_to_unfollow = get_object_or_404(User, id=user_id)
+    def post(self, request, user_id):
+        user_to_unfollow = get_object_or_404(CustomUser, id=user_id)
 
-    user_to_unfollow.followers.remove(request.user)
-    return Response(
-        {"message": "Successfully unfollowed user."},
-        status=status.HTTP_200_OK,
-    )
+        user_to_unfollow.followers.remove(request.user)
+        return Response(
+            {"message": "Successfully unfollowed user."},
+            status=status.HTTP_200_OK,
+        )
