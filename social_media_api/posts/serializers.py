@@ -1,47 +1,33 @@
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
-
-User = get_user_model()
+from .models import Post, Comment
 
 
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField()
+class PostSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
 
     class Meta:
-        model = User
-        fields = (
-            'id',
-            'username',
-            'email',
-            'password',
-            'bio',
-            'profile_picture',
-        )
-
-    def create(self, validated_data):
-        user = get_user_model().objects.create_user(
-            username=validated_data.get('username'),
-            email=validated_data.get('email'),
-            password=validated_data.get('password'),
-        )
-
-        user.bio = validated_data.get('bio', '')
-        user.profile_picture = validated_data.get('profile_picture', None)
-        user.save()
-
-        Token.objects.create(user=user)
-
-        return user
+        model = Post
+        fields = ("id", "author", "title", "content", "created_at", "updated_at")
 
 
-class UserSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
+
     class Meta:
-        model = User
-        fields = (
-            'id',
-            'username',
-            'email',
-            'bio',
-            'profile_picture',
-        )
+        model = Comment
+        fields = ("id", "post", "author", "content", "created_at", "updated_at")
+
+class PostSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ("id", "author", "title", "content", "created_at", "updated_at")
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ("id", "post", "author", "content", "created_at", "updated_at")
